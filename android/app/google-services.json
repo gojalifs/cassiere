@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "369097246205",
+    "project_id": "cassiere-e17b7",
+    "storage_bucket": "cassiere-e17b7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369097246205:android:11c9920e1b3994998b0594",
+        "android_client_info": {
+          "package_name": "com.example.cassiere"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369097246205-v41kg2vm02op563gfitj4t35t2rtli63.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJ7nh0g7KcBdftf9LFfhGN7by_XKHm1j8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369097246205-v41kg2vm02op563gfitj4t35t2rtli63.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

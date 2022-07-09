@@ -1,7 +1,6 @@
 import 'package:cassiere/model/product.dart';
 import 'package:cassiere/model/transaction.dart';
 import 'package:cassiere/model/user.dart';
-import 'package:cassiere/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,12 +8,6 @@ import 'package:sqflite/sqflite.dart';
 
 class DbHelper {
   final String _tableAdminName = 'user';
-  final String _columnId = 'id';
-  final String _columnName = 'name';
-  final String _columnEmail = 'email';
-  final String _columnPhone = 'phone';
-  final String _columnPassword = 'password';
-  final String _columnStatus = 'status';
 
   Future initDb() async {
     String dbPath = await getDatabasesPath();
@@ -22,12 +15,12 @@ class DbHelper {
     return openDatabase(path, version: 1, onCreate: (Database db, int version) {
       db.execute('''
         CREATE TABLE user (
-          $_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          $_columnName TEXT,
-          $_columnEmail TEXT,
-          $_columnPhone TEXT,
-          $_columnPassword TEXT,
-          $_columnStatus TEXT          
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          name TEXT,
+          email TEXT,
+          phone TEXT,
+          password TEXT,
+          isAdmin INTEGER
         )
       ''');
       db.execute('''
@@ -74,16 +67,16 @@ class DbHelper {
 
   /// ADMIN SECTION
   Future addUser(String name, String email, String phone, String password,
-      String status) async {
+      int isAdmin) async {
     final Database db = await initDb();
     db.insert(
       _tableAdminName,
       {
-        _columnName: name,
-        _columnEmail: email,
-        _columnPhone: phone,
-        _columnPassword: password,
-        _columnStatus: status
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'password': password,
+        'isAdmin': isAdmin
       },
     );
   }
@@ -97,6 +90,11 @@ class DbHelper {
     );
   }
 
+  Future deleteEmployee(int id) async {
+    final Database db = await initDb();
+    db.delete('user', where: 'id = $id');
+  }
+
   Future editProduct() async {
     final Database db = await initDb();
   }
@@ -104,34 +102,37 @@ class DbHelper {
   Future readUser() async {
     final Database db = await initDb();
     final List<Map<String, dynamic>> maps = await db.query(_tableAdminName);
-    print(maps);
     return maps;
   }
 
   /// EMPLOYEE SECTION
 
-  Future readEmployee() async {
+  Future<List<User>> readEmployee() async {
     final Database db = await initDb();
-    final List<Map<String, dynamic>> maps = await db.query('user');
-    return maps;
+    final List<Map<String, dynamic>> maps =
+        await db.query('user', orderBy: 'name');
+    return maps.map((map) => User.fromMap(map)).toList();
   }
 
-  Future<String> doLogin(String email, String password,
+  Future<bool> doLogin(String email, String password,
       {required BuildContext context}) async {
-    String type = '';
+    bool type = false;
     final Database db = await initDb();
-    var navigator = Navigator.of(context);
+
     var resp = await db.rawQuery(
         'SELECT * FROM user WHERE email = \'$email\' AND password = \'$password\'');
+
     if (resp.isNotEmpty) {
-      type = resp[0]['status'].toString();
+      type = resp[0]['isAdmin'] == 1 ? true : false;
       final prefs = await SharedPreferences.getInstance();
       prefs.setString('name', resp[0]['name'].toString());
-      final username = resp.map((e) => User.fromMap(e)).toList();
-      print(username);
+      prefs.setInt('id', int.parse(resp[0]['id'].toString()));
+      prefs.setBool('isAdmin', type);
+      prefs.setBool('isLoggedIn', true);
+
       return type;
     } else {
-      return '0';
+      return type;
     }
   }
 

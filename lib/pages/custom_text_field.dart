@@ -9,6 +9,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextInputType? inputType;
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatter;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextFormField(
       {super.key,
@@ -18,7 +19,8 @@ class CustomTextFormField extends StatelessWidget {
       this.suffixIcon,
       this.inputType = TextInputType.text,
       this.textInputAction = TextInputAction.next,
-      this.inputFormatter});
+      this.inputFormatter,
+      this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class CustomTextFormField extends StatelessWidget {
       enableSuggestions: true,
       keyboardType: inputType,
       textInputAction: textInputAction,
+      onChanged: onChanged,
       validator: (value) {
         if (controller.text.isEmpty) {
           return 'Please fill this field';

@@ -1,9 +1,11 @@
 import 'package:cassiere/model/product.dart';
 import 'package:cassiere/model/transaction.dart';
+import 'package:cassiere/pages/custom_text_field.dart';
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({Key? key}) : super(key: key);
@@ -14,11 +16,13 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _productIdController = TextEditingController();
   final _amountKey = GlobalKey<FormState>();
   final _productKey = GlobalKey<FormState>();
   DbHelper dbHelper = DbHelper();
   List<Product> products = [];
   List<Map<String, dynamic>> orderList = [];
+  String cashier = '';
   int qty = 1;
   int productId = 0;
   int subTotal = 0;
@@ -32,6 +36,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   void initState() {
+    getCashier();
     dbHelper.readProducts().then((value) {
       setState(() {
         products = value;
@@ -43,6 +48,13 @@ class _PaymentPageState extends State<PaymentPage> {
       });
     });
     super.initState();
+  }
+
+  Future getCashier() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      cashier = prefs.getString('name') ?? '';
+    });
   }
 
   @override
@@ -59,31 +71,72 @@ class _PaymentPageState extends State<PaymentPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Form(
-                    key: _productKey,
-                    child: DropdownSearch(
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          hintText: 'Select Product',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Cashier',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      validator: (String? value) {
-                        if (value == null) {
-                          return 'Please select';
-                        }
-                        return null;
-                      },
-                      autoValidateMode: AutovalidateMode.onUserInteraction,
-                      items: products.map((e) => e.name).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          productId =
-                              products.firstWhere((e) => e.name == value).id;
-                        });
-                      },
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        ': $cashier',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Form(
+                    key: _productKey,
+                    child: Column(
+                      children: [
+                        DropdownSearch(
+                          dropdownDecoratorProps: DropDownDecoratorProps(
+                            dropdownSearchDecoration: InputDecoration(
+                              hintText: 'Select Product',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                          validator: (String? value) {
+                            if (value == null) {
+                              return 'Please select';
+                            }
+                            return null;
+                          },
+                          autoValidateMode: AutovalidateMode.onUserInteraction,
+                          items: products.map((e) => e.name).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              productId = products
+                                  .firstWhere((e) => e.name == value)
+                                  .id;
+                              _productIdController.text = productId.toString();
+                            });
+                          },
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        CustomTextFormField(
+                          label: 'Product ID',
+                          controller: _productIdController,
+                          onChanged: (value) {
+                            productId = int.parse(_productIdController.text);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),

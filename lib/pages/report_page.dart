@@ -18,7 +18,6 @@ class _SalesReportPageState extends State<SalesReportPage> {
       setState(() {
         reports = value;
       });
-      print(reports.map((e) => e['transactionDetail']).toList());
     });
     super.initState();
   }
@@ -30,7 +29,7 @@ class _SalesReportPageState extends State<SalesReportPage> {
         title: const Text('Sales Report'),
       ),
       body: DataTable(
-        columns: [
+        columns: const [
           DataColumn(label: Text('id')),
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Total')),

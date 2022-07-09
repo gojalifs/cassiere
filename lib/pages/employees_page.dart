@@ -1,10 +1,12 @@
+import 'package:cassiere/model/user.dart';
 import 'package:cassiere/pages/custom_text_field.dart';
+import 'package:cassiere/pages/signup_page.dart';
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqlite_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmployeesPage extends StatefulWidget {
-  EmployeesPage({Key? key}) : super(key: key);
+  const EmployeesPage({Key? key}) : super(key: key);
 
   @override
   State<EmployeesPage> createState() => _EmployeesPageState();
@@ -12,14 +14,26 @@ class EmployeesPage extends StatefulWidget {
 
 class _EmployeesPageState extends State<EmployeesPage> {
   DbHelper dbHelper = DbHelper();
+  List<User> users = [];
   Future getEmployees = DbHelper().readEmployee();
   List employees = [];
+  int id = 0;
+
+  readActiveUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return id = prefs.getInt('id')!;
+  }
 
   @override
   void initState() {
     dbHelper.readEmployee().then((value) {
       setState(() {
-        employees = value;
+        users = value;
+      });
+    });
+    readActiveUser().then((value) {
+      setState(() {
+        id = value;
       });
     });
     super.initState();
@@ -38,38 +52,68 @@ class _EmployeesPageState extends State<EmployeesPage> {
             future: getEmployees,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                if (employees.isEmpty) {
+                if (users.isEmpty) {
                   return const Text('Done');
                 } else {
-                  return Row(
-                    children: [
-                      const Expanded(
-                        flex: 6,
-                        child: ListTile(
-                          title: Text('Jamal'),
-                          subtitle: Text('Admin'),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (_) {
-                              return EditEmployee();
-                            }));
-                          },
-                          icon: const Icon(Icons.edit_rounded),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.delete_rounded),
-                        ),
-                      ),
-                    ],
+                  // print(employees
+                  //     .where((element) => element['id'] == id)
+                  //     .toList());
+                  return ListView(
+                    children: users
+                        .map((e) => ListTile(
+                              title: Text(e.name!),
+                              subtitle: Text(e.email!),
+                              trailing: const Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SignUpPage(
+                                      name: e.name,
+                                      email: e.email,
+                                      phone: e.phone,
+                                      password: e.password,
+                                      confirmPassword: e.password,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ))
+                        .toList(),
+                    // employees.map((e) {
+                    //   return ListTile(
+                    //     title:
+                    //         e['id'] == id ? Text(e['name']) : Text(e['name']),
+                    //     subtitle: Text(e['email']),
+                    //     trailing: e['id'] == id
+                    //         ? IconButton(
+                    //             onPressed: () {
+                    //               Navigator.of(context).push(MaterialPageRoute(
+                    //                   builder: ((context) => SignUpPage(name: e[''],))));
+                    //             },
+                    //             icon: const Icon(Icons.edit))
+                    //         : Wrap(
+                    //             children: [
+                    //               IconButton(
+                    //                 onPressed: () {},
+                    //                 icon: const Icon(Icons.edit),
+                    //               ),
+                    //               IconButton(
+                    //                 icon: const Icon(Icons.delete),
+                    //                 color: e['id'] == id
+                    //                     ? Colors.grey
+                    //                     : Colors.red,
+                    //                 onPressed: () {
+                    //                   dbHelper.deleteEmployee(e['id']);
+                    //                   setState(() {
+                    //                     employees.remove(e);
+                    //                   });
+                    //                 },
+                    //               ),
+                    //             ],
+                    //           ),
+                    //   );
+                    // }).toList(),
                   );
                 }
               } else {
@@ -84,7 +128,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
 }
 
 class EditEmployee extends StatefulWidget {
-  EditEmployee({Key? key}) : super(key: key);
+  const EditEmployee({Key? key}) : super(key: key);
 
   @override
   State<EditEmployee> createState() => _EditEmployeeState();
@@ -129,8 +173,8 @@ class _EditEmployeeState extends State<EditEmployee> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(onPressed: () {}, child: Text('Cancel')),
-                ElevatedButton(onPressed: () {}, child: Text('Save')),
+                ElevatedButton(onPressed: () {}, child: const Text('Cancel')),
+                ElevatedButton(onPressed: () {}, child: const Text('Save')),
               ],
             ),
           ],

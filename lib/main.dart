@@ -1,7 +1,5 @@
+import 'package:cassiere/pages/landing_page.dart';
 import 'package:flutter/material.dart';
-
-import 'package:cassiere/pages/home_page.dart';
-import 'package:cassiere/pages/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,7 +50,7 @@ class MyApp extends StatelessWidget {
       ),
 
       /// TODO
-      home: const LoginPage(),
+      home: const LandingPage(),
     );
   }
 }

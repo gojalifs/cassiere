@@ -4,34 +4,28 @@ import 'package:cassiere/pages/login_page.dart';
 import 'package:cassiere/pages/payment_page.dart';
 import 'package:cassiere/pages/report_page.dart';
 import 'package:cassiere/pages/product_page.dart';
+import 'package:cassiere/utils/prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key, required this.users}) : super(key: key);
-  final String users;
+  const HomePage({Key? key, required this.isAdmin}) : super(key: key);
+  final bool isAdmin;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  Prefs prefs = Prefs();
   final List<String> _menu = ['New Payment', 'Print Invoice', 'Sales Report'];
-  final List<String> _adminMenu = ['Update Stock', 'Update Employee'];
+  final List<String> _adminMenu = ['Stocks', 'Update Employee'];
 
   String user = '';
   @override
   void initState() {
-    getName();
+    prefs.getName().then((value) => user = value);
     super.initState();
-  }
-
-  getName() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      user = prefs.getString('name')!;
-    });
   }
 
   @override
@@ -44,6 +38,10 @@ class _HomePageState extends State<HomePage> {
           actions: [
             IconButton(
               onPressed: () {
+                () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.clear();
+                }();
                 Navigator.pushAndRemoveUntil(context,
                     MaterialPageRoute(builder: (_) {
                   return const LoginPage();
@@ -66,15 +64,31 @@ class _HomePageState extends State<HomePage> {
                 mainAxisSpacing: 20,
                 crossAxisCount: 2,
                 children: List.generate(
-                  widget.users == 'true' ? _adminMenu.length : _menu.length,
+                  widget.isAdmin ? _adminMenu.length : _menu.length,
                   (index) => InkWell(
                     onTap: (() {
-                      if (widget.users == 'false') {
+                      if (widget.isAdmin) {
                         if (index == 0) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => PaymentPage(),
+                              builder: (_) => const NewProductPage(),
+                            ),
+                          );
+                        } else if (index == 1) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const EmployeesPage(),
+                            ),
+                          );
+                        }
+                      } else {
+                        if (index == 0) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PaymentPage(),
                             ),
                           );
                         } else if (index == 1) {
@@ -92,33 +106,13 @@ class _HomePageState extends State<HomePage> {
                             ),
                           );
                         }
-                      } else {
-                        if (index == 0) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  // const UpdateStock(),
-                                  const NewProductPage(),
-                            ),
-                          );
-                        } else if (index == 1) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => EmployeesPage(),
-                            ),
-                          );
-                        }
                       }
                     }),
                     child: Card(
                       color: Colors.amber,
                       child: Center(
                         child: Text(
-                          widget.users == 'true'
-                              ? _adminMenu[index]
-                              : _menu[index],
+                          widget.isAdmin ? _adminMenu[index] : _menu[index],
                         ),
                       ),
                     ),

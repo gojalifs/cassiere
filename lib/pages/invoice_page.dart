@@ -9,7 +9,7 @@ class InvoicePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Invoice'),
       ),
-      body: Center(
+      body: const Center(
         child: Text('Invoice'),
       ),
     );

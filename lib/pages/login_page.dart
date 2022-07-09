@@ -41,9 +41,10 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Container(
                       margin: const EdgeInsets.symmetric(vertical: 50),
-                      height: 100,
-                      width: 100,
-                      child: Image.asset('assets/images/cassiere_logo.png'),
+                      height: 250,
+                      width: 250,
+                      child:
+                          Image.asset('assets/images/login_illustration.png'),
                     ),
                     Text(
                       'Please Login!',
@@ -94,18 +95,15 @@ class _LoginPageState extends State<LoginPage> {
                                     context: context,
                                   )
                                       .then((value) {
-                                    value == '0'
-                                        ? print(value)
-                                        : navigator.pushReplacement(
-                                            MaterialPageRoute(
-                                              builder: (_) {
-                                                print(value);
-                                                return HomePage(
-                                                  users: value,
-                                                );
-                                              },
-                                            ),
+                                    navigator.pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (_) {
+                                          return HomePage(
+                                            isAdmin: value,
                                           );
+                                        },
+                                      ),
+                                    );
                                   });
                                 }
                               },

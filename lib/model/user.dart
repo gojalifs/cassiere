@@ -1,17 +1,19 @@
 import 'dart:convert';
 
 class User {
-  int id;
-  String name;
-  String email;
-  String phone;
-  String password;
+  int? id;
+  String? name;
+  String? email;
+  String? phone;
+  String? password;
+  int? isAdmin;
   User({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.password,
+    this.id,
+    this.name,
+    this.email,
+    this.phone,
+    this.password,
+    this.isAdmin,
   });
 
   User copyWith({
@@ -20,6 +22,7 @@ class User {
     String? email,
     String? phone,
     String? password,
+    int? isAdmin,
   }) {
     return User(
       id: id ?? this.id,
@@ -27,6 +30,7 @@ class User {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       password: password ?? this.password,
+      isAdmin: isAdmin ?? this.isAdmin,
     );
   }
 
@@ -37,16 +41,18 @@ class User {
       'email': email,
       'phone': phone,
       'password': password,
+      'isAdmin': isAdmin,
     };
   }
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
-      id: map['id']?.toInt() ?? 0,
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      phone: map['phone'] ?? '',
-      password: map['password'] ?? '',
+      id: map['id']?.toInt(),
+      name: map['name'],
+      email: map['email'],
+      phone: map['phone'],
+      password: map['password'],
+      isAdmin: map['isAdmin']?.toInt(),
     );
   }
 
@@ -56,7 +62,7 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, phone: $phone, password: $password)';
+    return 'User(id: $id, name: $name, email: $email, phone: $phone, password: $password, isAdmin: $isAdmin)';
   }
 
   @override
@@ -68,7 +74,8 @@ class User {
         other.name == name &&
         other.email == email &&
         other.phone == phone &&
-        other.password == password;
+        other.password == password &&
+        other.isAdmin == isAdmin;
   }
 
   @override
@@ -77,6 +84,7 @@ class User {
         name.hashCode ^
         email.hashCode ^
         phone.hashCode ^
-        password.hashCode;
+        password.hashCode ^
+        isAdmin.hashCode;
   }
 }

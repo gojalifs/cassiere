@@ -1,7 +1,6 @@
 import 'package:cassiere/model/product.dart';
 import 'package:cassiere/pages/custom_text_field.dart';
 import 'package:cassiere/utils/db_helper.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
 class UpdateStock extends StatefulWidget {
@@ -119,9 +118,7 @@ class _UpdateStockState extends State<UpdateStock> {
                                       ],
                                     );
                                   });
-                              dbHelper
-                                  .readProducts()
-                                  .then((value) => print(value));
+                              dbHelper.readProducts();
                             });
                           }
                         },
@@ -131,9 +128,7 @@ class _UpdateStockState extends State<UpdateStock> {
                     ElevatedButton(
                       onPressed: () {
                         DbHelper dbHelper = DbHelper();
-                        dbHelper.readProducts().then((value) {
-                          print(value);
-                        });
+                        dbHelper.readProducts().then((value) {});
                       },
                       child: const Text('Check'),
                     ),

@@ -1,10 +1,11 @@
 import 'package:cassiere/model/product.dart';
 import 'package:cassiere/model/transaction.dart';
-import 'package:cassiere/pages/custom_text_field.dart';
+import 'package:cassiere/library/custom_text_field.dart';
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -31,8 +32,9 @@ class _PaymentPageState extends State<PaymentPage> {
   int transactionId = 0;
   List<TransactionData> transactionList = [];
   Map<String, dynamic> transactionData = {};
-  List<TransactionDetail> transactionDetailList = [];
   Map<String, dynamic> transactionDetailData = {};
+  List<TransactionDetail> transactionDetailList = [];
+  List<int> productList = [];
 
   @override
   void initState() {
@@ -42,10 +44,14 @@ class _PaymentPageState extends State<PaymentPage> {
         products = value;
       });
     });
-    dbHelper.readTransaction().then((value) {
+    dbHelper.readMainTransaction().then((value) {
+      print(value.length);
       setState(() {
-        transactionId = value.last['transactionId'] + 1;
+        value.isEmpty
+            ? transactionId = 1
+            : transactionId = value.last.transactionId! + 1;
       });
+      print('id $transactionId');
     });
     super.initState();
   }
@@ -85,7 +91,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         width: 10,
                       ),
                       Text(
-                        ': $cashier',
+                        cashier,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -131,9 +137,56 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                         CustomTextFormField(
                           label: 'Product ID',
+                          hint: 'Type/Scan Product ID',
                           controller: _productIdController,
                           onChanged: (value) {
                             productId = int.parse(_productIdController.text);
+                          },
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (value) {
+                            print('submitted');
+                            // if (_productKey.currentState!.validate()) {
+                            //   setState(() {
+                            //     orderList.add({
+                            //       'productId': productId,
+                            //       'productName': products
+                            //           .firstWhere((e) => e.id == productId)
+                            //           .name,
+                            //       'productPrice': products
+                            //           .firstWhere((e) => e.id == productId)
+                            //           .price,
+                            //       'qty': qty,
+                            //     });
+                            //     subTotal = orderList
+                            //         .map((e) =>
+                            //             e['qty'] * int.parse(e['productPrice']))
+                            //         .reduce((e, f) => e + f);
+                            //     total = orderList
+                            //         .map((e) =>
+                            //             e['qty'] * int.parse(e['productPrice']))
+                            //         .reduce((e, f) => e + f);
+                            //   });
+                            //   transactionData = {
+                            //     'cashier_id': 'Fajar',
+                            //     'transaction_detail': orderList.toString(),
+                            //     'total': total.toString(),
+                            //     'cash': _amountController.text,
+                            //     'charge': charge.toString(),
+                            //     'date': DateTime.now().millisecondsSinceEpoch
+                            //   };
+                            //   transactionDetailData = {
+                            //     'transaction_id': '',
+                            //     'product_id': productId,
+                            //     'product_name': products
+                            //         .firstWhere((e) => e.id == productId)
+                            //         .name,
+                            //     'product_price': products
+                            //         .firstWhere((e) => e.id == productId)
+                            //         .price,
+                            //     'qty': qty,
+                            //     'sub_total': subTotal,
+                            //   };
+                            // }
                           },
                         ),
                       ],
@@ -187,6 +240,11 @@ class _PaymentPageState extends State<PaymentPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_productKey.currentState!.validate()) {
+                          var dt = DateTime.now();
+                          var formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+                          String formattedDateTime = formatter.format(dt);
+                          print(formattedDateTime);
+
                           setState(() {
                             orderList.add({
                               'productId': productId,
@@ -198,36 +256,40 @@ class _PaymentPageState extends State<PaymentPage> {
                                   .price,
                               'qty': qty,
                             });
-                            subTotal = orderList
-                                .map((e) =>
-                                    e['qty'] * int.parse(e['productPrice']))
-                                .reduce((e, f) => e + f);
+                            // subTotal = orderList
+                            //     .map((e) =>
+                            //         e['qty'] * int.parse(e['productPrice']))
+                            //     .reduce((e, f) => e + f);
+                            subTotal = qty *
+                                int.parse(products
+                                    .firstWhere((e) => e.id == productId)
+                                    .price);
                             total = orderList
                                 .map((e) =>
                                     e['qty'] * int.parse(e['productPrice']))
                                 .reduce((e, f) => e + f);
                           });
 
+                          productList.add(productId);
+                          // print(productList);
+                          transactionDetailData = {
+                            'transactionId': transactionId.toString(),
+                            'productId': productId,
+                            'quantity': qty.toString(),
+                            'subTotal': subTotal.toString(),
+                          };
+                          TransactionDetail.fromMap(transactionDetailData);
+                          transactionDetailList.add(
+                              TransactionDetail.fromMap(transactionDetailData));
+                          print(transactionDetailList);
                           transactionData = {
                             'cashier_id': 'Fajar',
-                            'transaction_detail': orderList.toString(),
+                            'transaction_detail':
+                                transactionDetailData.toString(),
                             'total': total.toString(),
                             'cash': _amountController.text,
                             'charge': charge.toString(),
                             'date': DateTime.now().millisecondsSinceEpoch
-                          };
-
-                          transactionDetailData = {
-                            'transaction_id': '',
-                            'product_id': productId,
-                            'product_name': products
-                                .firstWhere((e) => e.id == productId)
-                                .name,
-                            'product_price': products
-                                .firstWhere((e) => e.id == productId)
-                                .price,
-                            'qty': qty,
-                            'sub_total': subTotal,
                           };
                         }
                       },
@@ -244,36 +306,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     height: 5,
                   ),
                   const SizedBox(height: 5),
-                  DataTable(
-                    columns: const [
-                      DataColumn(label: Text('Item')),
-                      DataColumn(label: Text('Price')),
-                      DataColumn(label: Text('Qty')),
-                      DataColumn(label: Text('Total')),
-                    ],
-                    rows: orderList.isEmpty
-                        ? []
-                        : orderList
-                            .map((e) => DataRow(
-                                  cells: [
-                                    DataCell(
-                                      Text(e['productName']),
-                                    ),
-                                    DataCell(
-                                      Text(e['productPrice'].toString()),
-                                    ),
-                                    DataCell(
-                                      Text(e['qty'].toString()),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        '${e['qty'] * int.parse(e['productPrice'])}',
-                                      ),
-                                    ),
-                                  ],
-                                ))
-                            .toList(),
-                  ),
+                  OrderDetailList(orderList: orderList),
                   const Divider(
                     thickness: 3,
                     color: Colors.black,
@@ -323,8 +356,8 @@ class _PaymentPageState extends State<PaymentPage> {
                                 });
                               } else {
                                 setState(() {
-                                  charge = int.parse(_amountController.text) -
-                                      subTotal;
+                                  charge =
+                                      int.parse(_amountController.text) - total;
                                   _amountKey.currentState!.validate();
                                 });
                               }
@@ -353,9 +386,16 @@ class _PaymentPageState extends State<PaymentPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_amountKey.currentState!.validate()) {
+                          primaryFocus!.unfocus();
                           dbHelper.insertTransaction(
-                            TransactionData.fromMap(transactionData),
-                            TransactionDetail.fromMap(transactionDetailData),
+                            // transactionData, transactionDetailList);
+                            TransactionData(
+                                cashierId: cashier,
+                                total: total.toString(),
+                                cash: _amountController.text,
+                                charge: charge.toString(),
+                                date: DateTime.now().millisecondsSinceEpoch),
+                            transactionDetailList,
                           );
                           showDialog(
                               context: context,
@@ -365,7 +405,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   content: const Text(
                                       'Are you sure to submit this order?'),
                                   actions: [
-                                    TextButton(
+                                    ElevatedButton(
                                       child: const Text('Yes'),
                                       onPressed: () {
                                         Navigator.pop(context);
@@ -412,6 +452,50 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class OrderDetailList extends StatefulWidget {
+  final List<Map<String, dynamic>> orderList;
+  const OrderDetailList({Key? key, required this.orderList}) : super(key: key);
+
+  @override
+  State<OrderDetailList> createState() => _OrderDetailListState();
+}
+
+class _OrderDetailListState extends State<OrderDetailList> {
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: const [
+        DataColumn(label: Text('Item')),
+        DataColumn(label: Text('Price')),
+        DataColumn(label: Text('Qty')),
+        DataColumn(label: Text('Total')),
+      ],
+      rows: widget.orderList.isEmpty
+          ? []
+          : widget.orderList
+              .map((e) => DataRow(
+                    cells: [
+                      DataCell(
+                        Text(e['productName']),
+                      ),
+                      DataCell(
+                        Text(e['productPrice'].toString()),
+                      ),
+                      DataCell(
+                        Text(e['qty'].toString()),
+                      ),
+                      DataCell(
+                        Text(
+                          '${e['qty'] * int.parse(e['productPrice'])}',
+                        ),
+                      ),
+                    ],
+                  ))
+              .toList(),
     );
   }
 }

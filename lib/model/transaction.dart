@@ -1,15 +1,17 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class TransactionData {
   String cashierId;
-  String transactionDetail;
+  int? transactionId;
   String total;
   String cash;
   String charge;
-  DateTime date;
+  int date;
   TransactionData({
     required this.cashierId,
-    required this.transactionDetail,
+    this.transactionId,
     required this.total,
     required this.cash,
     required this.charge,
@@ -18,15 +20,15 @@ class TransactionData {
 
   TransactionData copyWith({
     String? cashierId,
-    String? transactionDetail,
+    int? transactionId,
     String? total,
     String? cash,
     String? charge,
-    DateTime? date,
+    int? date,
   }) {
     return TransactionData(
       cashierId: cashierId ?? this.cashierId,
-      transactionDetail: transactionDetail ?? this.transactionDetail,
+      transactionId: transactionId ?? this.transactionId,
       total: total ?? this.total,
       cash: cash ?? this.cash,
       charge: charge ?? this.charge,
@@ -37,22 +39,22 @@ class TransactionData {
   Map<String, dynamic> toMap() {
     return {
       'cashierId': cashierId,
-      'transactionDetail': transactionDetail,
+      'transactionId': transactionId,
       'total': total,
       'cash': cash,
       'charge': charge,
-      'date': date.millisecondsSinceEpoch,
+      'date': date,
     };
   }
 
   factory TransactionData.fromMap(Map<String, dynamic> map) {
     return TransactionData(
       cashierId: map['cashierId'] ?? '',
-      transactionDetail: map['transactionDetail'] ?? '',
+      transactionId: map['transactionId'],
       total: map['total'] ?? '',
       cash: map['cash'] ?? '',
       charge: map['charge'] ?? '',
-      date: DateTime.fromMillisecondsSinceEpoch(map['date']),
+      date: int.parse(map['date']),
     );
   }
 
@@ -63,7 +65,7 @@ class TransactionData {
 
   @override
   String toString() {
-    return 'TransactionData(cashierId: $cashierId, transactionDetail: $transactionDetail, total: $total, cash: $cash, charge: $charge, date: $date)';
+    return 'TransactionData(cashierId: $cashierId, transactionId: $transactionId, total: $total, cash: $cash, charge: $charge, date: $date)';
   }
 
   @override
@@ -72,7 +74,7 @@ class TransactionData {
 
     return other is TransactionData &&
         other.cashierId == cashierId &&
-        other.transactionDetail == transactionDetail &&
+        other.transactionId == transactionId &&
         other.total == total &&
         other.cash == cash &&
         other.charge == charge &&
@@ -82,7 +84,7 @@ class TransactionData {
   @override
   int get hashCode {
     return cashierId.hashCode ^
-        transactionDetail.hashCode ^
+        transactionId.hashCode ^
         total.hashCode ^
         cash.hashCode ^
         charge.hashCode ^
@@ -91,45 +93,45 @@ class TransactionData {
 }
 
 class TransactionDetail {
-  String productName;
+  String transactionId;
+  String productId;
   String quantity;
-  String productPrice;
   String subTotal;
   TransactionDetail({
-    required this.productName,
+    required this.transactionId,
+    required this.productId,
     required this.quantity,
-    required this.productPrice,
     required this.subTotal,
   });
 
   TransactionDetail copyWith({
-    String? productName,
+    String? transactionId,
+    String? productId,
     String? quantity,
-    String? productPrice,
     String? subTotal,
   }) {
     return TransactionDetail(
-      productName: productName ?? this.productName,
+      transactionId: transactionId ?? this.transactionId,
+      productId: productId ?? this.productId,
       quantity: quantity ?? this.quantity,
-      productPrice: productPrice ?? this.productPrice,
       subTotal: subTotal ?? this.subTotal,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'productName': productName,
+      'transactionId': transactionId,
+      'productId': productId,
       'quantity': quantity,
-      'productPrice': productPrice,
       'subTotal': subTotal,
     };
   }
 
   factory TransactionDetail.fromMap(Map<String, dynamic> map) {
     return TransactionDetail(
-      productName: map['productName'] ?? '',
+      transactionId: map['transactionId'] ?? '',
+      productId: map['productId'].toString(),
       quantity: map['quantity'] ?? '',
-      productPrice: map['productPrice'] ?? '',
       subTotal: map['subTotal'] ?? '',
     );
   }
@@ -141,7 +143,7 @@ class TransactionDetail {
 
   @override
   String toString() {
-    return 'TransactionDetail(productName: $productName, quantity: $quantity, productPrice: $productPrice, subTotal: $subTotal)';
+    return 'TransactionDetail(transactionId: $transactionId, productId: $productId, quantity: $quantity, subTotal: $subTotal)';
   }
 
   @override
@@ -149,17 +151,17 @@ class TransactionDetail {
     if (identical(this, other)) return true;
 
     return other is TransactionDetail &&
-        other.productName == productName &&
+        other.transactionId == transactionId &&
+        other.productId == productId &&
         other.quantity == quantity &&
-        other.productPrice == productPrice &&
         other.subTotal == subTotal;
   }
 
   @override
   int get hashCode {
-    return productName.hashCode ^
+    return transactionId.hashCode ^
+        productId.hashCode ^
         quantity.hashCode ^
-        productPrice.hashCode ^
         subTotal.hashCode;
   }
 }

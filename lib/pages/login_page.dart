@@ -2,8 +2,9 @@ import 'package:cassiere/pages/home_page.dart';
 import 'package:cassiere/pages/signup_page.dart';
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import 'custom_text_field.dart';
+import '../library/custom_text_field.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -39,16 +40,19 @@ class _LoginPageState extends State<LoginPage> {
               child: Center(
                 child: Column(
                   children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 50),
-                      height: 250,
-                      width: 250,
-                      child:
-                          Image.asset('assets/images/login_illustration.png'),
+                    const SizedBox(
+                      height: 30,
                     ),
                     Text(
                       'Please Login!',
                       style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      height: 250,
+                      width: 250,
+                      child:
+                          Image.asset('assets/images/login_illustration.png'),
                     ),
                     const SizedBox(height: 20),
                     Form(
@@ -95,15 +99,26 @@ class _LoginPageState extends State<LoginPage> {
                                     context: context,
                                   )
                                       .then((value) {
-                                    navigator.pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (_) {
-                                          return HomePage(
-                                            isAdmin: value,
-                                          );
-                                        },
-                                      ),
-                                    );
+                                    print(value);
+                                    if (value[1] == 'success') {
+                                      ScaffoldMessenger.of(context)
+                                          .clearSnackBars();
+                                      navigator.pushReplacement(
+                                        MaterialPageRoute(
+                                          builder: (_) {
+                                            return HomePage(
+                                              isAdmin: value[0],
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                        content: Text(
+                                            'Login failed, email or password is wrong!'),
+                                      ));
+                                    }
                                   });
                                 }
                               },
@@ -124,6 +139,21 @@ class _LoginPageState extends State<LoginPage> {
                               },
                             ),
                           ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                              onPressed: () {
+                                var dt = DateTime.now();
+                                var formatter =
+                                    DateFormat('yyyy-MM-dd HH:mm:ss');
+                                String formatted =
+                                    formatter.format(dt); // Save this to DB
+                                print(formatted); // Output: 2021-05-11 08:52:45
+                                String a =
+                                    formatter.parse(formatted).toString();
+                                print(
+                                    'formart $formatted'); // Convert back to DateTime object
+                              },
+                              child: const Text('Coba')),
                         ],
                       ),
                     ),

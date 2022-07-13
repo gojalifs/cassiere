@@ -1,9 +1,10 @@
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:flutter/material.dart';
 
-import 'custom_text_field.dart';
+import '../library/custom_text_field.dart';
 
 class SignUpPage extends StatefulWidget {
+  final String? title;
   final String? name;
   final String? email;
   final String? phone;
@@ -16,7 +17,8 @@ class SignUpPage extends StatefulWidget {
       this.email,
       this.phone,
       this.password,
-      this.confirmPassword})
+      this.confirmPassword,
+      this.title})
       : super(key: key);
 
   @override
@@ -51,19 +53,19 @@ class _SignUpPageState extends State<SignUpPage> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: SafeArea(
         child: Scaffold(
+          appBar: AppBar(
+            title: widget.title != null
+                ? Text(widget.title!)
+                : widget.name == null
+                    ? const Text('Sign Up')
+                    : const Text('Edit Profile'),
+          ),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Center(
                 child: Column(
                   children: [
-                    Text(
-                      _nameController.text.isEmpty
-                          ? 'Register'
-                          : 'Edit Profile',
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    const SizedBox(height: 20),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -116,34 +118,60 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 20),
                           SizedBox(
                             width: double.infinity,
-                            child: _nameController.text.isEmpty
+                            child: widget.name == null
                                 ? ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
                                         DbHelper dbHelper = DbHelper();
-                                        dbHelper.addUser(
-                                            _nameController.text,
-                                            _emailController.text,
-                                            _phoneController.text,
-                                            _passwordController.text,
-                                            isChecked ? 1 : 0);
+                                        dbHelper
+                                            .checkUser(_emailController.text)
+                                            .then((value) {
+                                          if (value == 0) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Registering'),
+                                              ),
+                                            );
+                                            primaryFocus!.unfocus();
+                                            dbHelper.addUser(
+                                                _nameController.text,
+                                                _emailController.text,
+                                                _phoneController.text,
+                                                _passwordController.text,
+                                                isChecked ? 1 : 0);
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Email already registered'),
+                                              ),
+                                            );
+                                          }
+                                        });
                                       }
                                     },
-                                    child: const Text('Sign Me Up'),
+                                    child: widget.title == null
+                                        ? const Text('Sign Me Up')
+                                        : const Text('Add Employee'),
                                   )
 
-                                /// TODO : add sign up button
+                                /// TODO : add update user button
                                 : ElevatedButton(
                                     onPressed: () {},
                                     child: const Text('Save Editing')),
                           ),
                           SizedBox(
                             width: double.infinity,
-                            child: _nameController.text.isEmpty
+                            child: widget.name == null
                                 ? ElevatedButton(
                                     onPressed: () {
                                       DbHelper dbHelper = DbHelper();
-                                      dbHelper.readUser();
+                                      dbHelper
+                                          .readUser()
+                                          .then((value) => print(value));
+                                      primaryFocus!.unfocus();
                                     },
                                     child: const Text('Back To Login'))
 

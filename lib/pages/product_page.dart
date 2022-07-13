@@ -1,10 +1,12 @@
 import 'package:cassiere/model/product.dart';
-import 'package:cassiere/pages/custom_text_field.dart';
+import 'package:cassiere/library/custom_text_field.dart';
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:flutter/material.dart';
 
 class UpdateStock extends StatefulWidget {
-  const UpdateStock({Key? key}) : super(key: key);
+  final Product? product;
+
+  const UpdateStock({super.key, this.product});
 
   @override
   State<UpdateStock> createState() => _UpdateStockState();
@@ -17,6 +19,15 @@ class _UpdateStockState extends State<UpdateStock> {
   final TextEditingController _noteController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isNewProduct = false;
+
+  @override
+  void initState() {
+    _nameController.text = widget.product?.name ?? '';
+    _priceController.text = widget.product?.price ?? '';
+    _categoryController.text = widget.product?.category ?? '';
+    _noteController.text = widget.product?.note ?? '';
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,41 +46,6 @@ class _UpdateStockState extends State<UpdateStock> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // DropdownSearch<String>(
-                    //   onChanged: ((value) {
-                    //     if (value == 'Add New') {
-                    //       setState(() {
-                    //         isNewProduct = true;
-                    //       });
-                    //     } else {
-                    //       setState(() {
-                    //         isNewProduct = false;
-                    //       });
-                    //     }
-                    //   }),
-                    //   dropdownDecoratorProps: DropDownDecoratorProps(
-                    //     dropdownSearchDecoration: InputDecoration(
-                    //       hintText: 'Select Product',
-                    //       border: OutlineInputBorder(
-                    //         borderRadius: BorderRadius.circular(10),
-                    //       ),
-                    //     ),
-                    //   ),
-                    //   validator: (value) {
-                    //     if (value == null) {
-                    //       return 'Please select';
-                    //     }
-                    //     return null;
-                    //   },
-                    //   autoValidateMode: AutovalidateMode.onUserInteraction,
-                    //   items: const [
-                    //     '1',
-                    //     '2',
-                    //     'Add New',
-                    //   ],
-                    // ),
-                    const SizedBox(height: 20),
-
                     CustomTextFormField(
                       label: 'Product Name',
                       controller: _nameController,
@@ -84,7 +60,6 @@ class _UpdateStockState extends State<UpdateStock> {
                     const SizedBox(height: 20),
                     CustomTextFormField(
                         label: 'Category', controller: _categoryController),
-
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
@@ -202,11 +177,77 @@ class _NewProductPageState extends State<NewProductPage> {
         crossAxisCount: 2,
         children: products
             .map(
-              (e) => Card(
-                child: Text(e.name),
+              (e) => InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UpdateStock(product: e),
+                    ),
+                  );
+                },
+                child: ProductCard(
+                  product: e,
+                ),
               ),
             )
             .toList(),
+      ),
+    );
+  }
+}
+
+class ProductCard extends StatelessWidget {
+  final Product product;
+  const ProductCard({
+    Key? key,
+    required this.product,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.amber,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Image.asset(
+              'assets/images/products.png',
+              fit: BoxFit.cover,
+              width: 100,
+              height: 100,
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.5),
+                ],
+                begin: Alignment.topCenter,
+                stops: const [0.5, 0.9],
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 10,
+            left: 10,
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                product.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -35,7 +35,6 @@ class DbHelper {
       db.execute('''
         CREATE TABLE transaction_table (
           transactionId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          transactionDetail TEXT,
           cashierId TEXT,
           total TEXT,
           cash TEXT,
@@ -47,9 +46,8 @@ class DbHelper {
         CREATE TABLE transaction_detail (
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           transactionId TEXT,
-          productName TEXT,
+          productId TEXT,
           quantity TEXT,
-          productPrice TEXT,
           subTotal TEXT
         )
       ''');
@@ -90,6 +88,17 @@ class DbHelper {
     );
   }
 
+  Future checkUser(String email) async {
+    final Database db = await initDb();
+    final List<Map<String, dynamic>> maps =
+        await db.query(_tableAdminName, where: 'email = ?', whereArgs: [email]);
+    if (maps.isEmpty) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
   Future deleteEmployee(int id) async {
     final Database db = await initDb();
     db.delete('user', where: 'id = $id');
@@ -114,7 +123,7 @@ class DbHelper {
     return maps.map((map) => User.fromMap(map)).toList();
   }
 
-  Future<bool> doLogin(String email, String password,
+  Future<List> doLogin(String email, String password,
       {required BuildContext context}) async {
     bool type = false;
     final Database db = await initDb();
@@ -130,9 +139,9 @@ class DbHelper {
       prefs.setBool('isAdmin', type);
       prefs.setBool('isLoggedIn', true);
 
-      return type;
+      return [type, 'success'];
     } else {
-      return type;
+      return [type, 'failed'];
     }
   }
 
@@ -169,19 +178,50 @@ class DbHelper {
   }
 
   Future insertTransaction(TransactionData transactionData,
-      TransactionDetail transactionDetail) async {
+      List<TransactionDetail> transactionDetail) async {
     final Database db = await initDb();
-
-    await db.insert(
+    Batch batch = db.batch();
+    db.insert(
       'transaction_table',
       transactionData.toMap(),
     );
-    await db.insert('transaction_detail', transactionDetail.toMap());
+    // db.insert('transaction_detail', transactionDetail.toMap());
+    // for (int i = 0; i < transactionDetail.length; i++) {
+    //   db.insert(
+    //     'transaction_detail',
+    //     transactionDetail[i].toMap(),
+    //   );
+    // }
+    // db.insert('transaction_detail', transactionDetail[0].toMap());
+    for (var element in transactionDetail) {
+      db.insert('transaction_detail', element.toMap());
+    }
+    // await batch.commit().then((value) => print(value));
   }
 
-  Future<List<Map<String, dynamic>>> readTransaction() async {
+  Future<List<TransactionData>> readMainTransaction() async {
     final Database db = await initDb();
-    final List<Map<String, dynamic>> maps = await db.query('transaction_table');
-    return maps;
+    final List<Map<String, dynamic>> mainTable =
+        await db.query('transaction_table');
+
+    List<TransactionData> newlist =
+        mainTable.map((e) => TransactionData.fromMap(e)).toList();
+
+    return newlist;
+  }
+
+  Future<List<TransactionDetail>> readDetailTransaction() async {
+    final Database db = await initDb();
+    final List<Map<String, dynamic>> maps =
+        await db.query('transaction_detail');
+    final List<TransactionDetail> result =
+        maps.map((e) => TransactionDetail.fromMap(e)).toList();
+    return result;
+  }
+
+  Future clearTransactions() async {
+    final Database db = await initDb();
+    await db.delete('transaction_table');
+    await db.delete('transaction_detail');
   }
 }

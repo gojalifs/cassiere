@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Prefs prefs = Prefs();
   final List<String> _menu = ['New Payment', 'Print Invoice', 'Sales Report'];
-  final List<String> _adminMenu = ['Stocks', 'Update Employee'];
+  final List<String> _adminMenu = ['Stocks', 'Employees'];
 
   String user = '';
   @override

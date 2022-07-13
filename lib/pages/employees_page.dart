@@ -1,5 +1,5 @@
 import 'package:cassiere/model/user.dart';
-import 'package:cassiere/pages/custom_text_field.dart';
+import 'package:cassiere/library/custom_text_field.dart';
 import 'package:cassiere/pages/signup_page.dart';
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +45,19 @@ class _EmployeesPageState extends State<EmployeesPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('List of Employees'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SignUpPage(
+                  title: 'Add Employee',
+                ),
+              ),
+            );
+          },
+          child: const Icon(Icons.add),
         ),
         body: Padding(
           padding: const EdgeInsets.all(10),

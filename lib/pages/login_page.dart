@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final List<String> users = ['admin', 'employee'];
 
-  DbHelper dbHelper = DbHelper();
+  LocalDbHelper dbHelper = LocalDbHelper();
 
   @override
   void initState() {

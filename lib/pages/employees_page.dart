@@ -13,14 +13,15 @@ class EmployeesPage extends StatefulWidget {
 }
 
 class _EmployeesPageState extends State<EmployeesPage> {
-  DbHelper dbHelper = DbHelper();
+  LocalDbHelper dbHelper = LocalDbHelper();
   List<User> users = [];
-  Future getEmployees = DbHelper().readEmployee();
+  Future getEmployees = LocalDbHelper().readEmployee();
   List employees = [];
   int id = 0;
 
   readActiveUser() async {
     final prefs = await SharedPreferences.getInstance();
+    print(prefs.getInt('id'));
     return id = prefs.getInt('id')!;
   }
 
@@ -87,6 +88,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
                                       phone: e.phone,
                                       password: e.password,
                                       confirmPassword: e.password,
+                                      id: e.id,
                                     ),
                                   ),
                                 );

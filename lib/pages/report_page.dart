@@ -16,7 +16,7 @@ class _SalesReportPageState extends State<SalesReportPage> {
   List<TransactionDetail> transactionDetails = [];
   List<Product> products = [];
   String report = '';
-  DbHelper dbHelper = DbHelper();
+  LocalDbHelper dbHelper = LocalDbHelper();
   @override
   void initState() {
     dbHelper.readMainTransaction().then((value) {

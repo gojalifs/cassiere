@@ -65,7 +65,7 @@ class _UpdateStockState extends State<UpdateStock> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          DbHelper dbHelper = DbHelper();
+                          LocalDbHelper dbHelper = LocalDbHelper();
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
 
@@ -100,13 +100,6 @@ class _UpdateStockState extends State<UpdateStock> {
                         child: const Text('Add'),
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        DbHelper dbHelper = DbHelper();
-                        dbHelper.readProducts().then((value) {});
-                      },
-                      child: const Text('Check'),
-                    ),
                   ],
                 ),
               ),
@@ -126,7 +119,7 @@ class NewProductPage extends StatefulWidget {
 }
 
 class _NewProductPageState extends State<NewProductPage> {
-  DbHelper dbHelper = DbHelper();
+  LocalDbHelper dbHelper = LocalDbHelper();
   List<Product> products = [];
 
   @override

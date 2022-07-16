@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cassiere/model/product.dart';
 import 'package:cassiere/model/transaction.dart';
 import 'package:cassiere/model/user.dart';
@@ -5,8 +7,32 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:http/http.dart' as http;
 
-class DbHelper {
+class OnlineDbHelper {
+  final _url = 'https://192.168.58.22/cassiere';
+
+  Future registerUser(String name, String email, String phone, String password,
+      int isAdmin) async {
+    var url = Uri.parse('$_url/register.php');
+  }
+
+  Future doLogin(String username, String password) async {
+    var url = Uri.parse('$_url/login.php');
+    var response = await http.post(url, body: {
+      'username': username,
+      'password': password,
+    });
+    var data = json.decode(response.body);
+    if (data['status'] == 'success') {
+      return data['data'];
+    } else {
+      return null;
+    }
+  }
+}
+
+class LocalDbHelper {
   final String _tableAdminName = 'user';
 
   Future initDb() async {
@@ -47,6 +73,8 @@ class DbHelper {
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           transactionId TEXT,
           productId TEXT,
+          productName TEXT,
+          productPrice TEXT,
           quantity TEXT,
           subTotal TEXT
         )

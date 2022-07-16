@@ -1,5 +1,6 @@
 import 'package:cassiere/utils/db_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../library/custom_text_field.dart';
 
@@ -10,6 +11,7 @@ class SignUpPage extends StatefulWidget {
   final String? phone;
   final String? password;
   final String? confirmPassword;
+  final int? id;
 
   const SignUpPage(
       {Key? key,
@@ -18,7 +20,8 @@ class SignUpPage extends StatefulWidget {
       this.phone,
       this.password,
       this.confirmPassword,
-      this.title})
+      this.title,
+      this.id})
       : super(key: key);
 
   @override
@@ -36,6 +39,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool isObscured = true;
   bool isChecked = false;
+  bool isOwn = true;
+
+  Future<int> getId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('id')!;
+  }
 
   @override
   void initState() {
@@ -44,6 +53,14 @@ class _SignUpPageState extends State<SignUpPage> {
     _phoneController = TextEditingController(text: widget.phone);
     _passwordController = TextEditingController(text: widget.password);
     _confirmPasswordController = TextEditingController(text: widget.password);
+    getId().then((value) {
+      if (widget.id != value) {
+        setState(() {
+          isOwn = false;
+        });
+      }
+      ;
+    });
     super.initState();
   }
 
@@ -122,7 +139,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ? ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
-                                        DbHelper dbHelper = DbHelper();
+                                        LocalDbHelper dbHelper =
+                                            LocalDbHelper();
                                         dbHelper
                                             .checkUser(_emailController.text)
                                             .then((value) {
@@ -164,22 +182,25 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           SizedBox(
                             width: double.infinity,
-                            child: widget.name == null
-                                ? ElevatedButton(
-                                    onPressed: () {
-                                      DbHelper dbHelper = DbHelper();
-                                      dbHelper
-                                          .readUser()
-                                          .then((value) => print(value));
-                                      primaryFocus!.unfocus();
-                                    },
-                                    child: const Text('Back To Login'))
+                            child: isOwn
+                                ? null
+                                : widget.name == null
+                                    ? ElevatedButton(
+                                        onPressed: () {
+                                          LocalDbHelper dbHelper =
+                                              LocalDbHelper();
+                                          dbHelper
+                                              .readUser()
+                                              .then((value) => print(value));
+                                          primaryFocus!.unfocus();
+                                        },
+                                        child: const Text('Back To Login'))
 
-                                /// TODO : add sign up button
-                                : ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Delete User'),
-                                  ),
+                                    /// TODO : add sign up button
+                                    : ElevatedButton(
+                                        onPressed: () {},
+                                        child: const Text('Delete User'),
+                                      ),
                           )
                         ],
                       ),

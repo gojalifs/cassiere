@@ -25,7 +25,7 @@ class InvoicePage extends StatelessWidget {
               String listB = 'one,two,three,four';
               var b = (listB.split(','));
               // print(b[0]); // print one
-              DbHelper dbHelper = DbHelper();
+              LocalDbHelper dbHelper = LocalDbHelper();
               // List<TransactionData> transactionData = [];
               // dbHelper.clearTransactions();
               dbHelper.readMainTransaction().then((value) {

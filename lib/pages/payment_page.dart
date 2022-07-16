@@ -20,7 +20,7 @@ class _PaymentPageState extends State<PaymentPage> {
   final TextEditingController _productIdController = TextEditingController();
   final _amountKey = GlobalKey<FormState>();
   final _productKey = GlobalKey<FormState>();
-  DbHelper dbHelper = DbHelper();
+  LocalDbHelper dbHelper = LocalDbHelper();
   List<Product> products = [];
   List<Map<String, dynamic>> orderList = [];
   String cashier = '';

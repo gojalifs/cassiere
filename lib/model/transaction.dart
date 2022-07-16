@@ -95,11 +95,15 @@ class TransactionData {
 class TransactionDetail {
   String transactionId;
   String productId;
+  String productName;
+  String productPrice;
   String quantity;
   String subTotal;
   TransactionDetail({
     required this.transactionId,
     required this.productId,
+    required this.productName,
+    required this.productPrice,
     required this.quantity,
     required this.subTotal,
   });
@@ -107,12 +111,16 @@ class TransactionDetail {
   TransactionDetail copyWith({
     String? transactionId,
     String? productId,
+    String? productName,
+    String? productPrice,
     String? quantity,
     String? subTotal,
   }) {
     return TransactionDetail(
       transactionId: transactionId ?? this.transactionId,
       productId: productId ?? this.productId,
+      productName: productName ?? this.productName,
+      productPrice: productPrice ?? this.productPrice,
       quantity: quantity ?? this.quantity,
       subTotal: subTotal ?? this.subTotal,
     );
@@ -122,6 +130,8 @@ class TransactionDetail {
     return {
       'transactionId': transactionId,
       'productId': productId,
+      'productName': productName,
+      'productPrice': productPrice,
       'quantity': quantity,
       'subTotal': subTotal,
     };
@@ -130,7 +140,9 @@ class TransactionDetail {
   factory TransactionDetail.fromMap(Map<String, dynamic> map) {
     return TransactionDetail(
       transactionId: map['transactionId'] ?? '',
-      productId: map['productId'].toString(),
+      productId: map['productId'] ?? '',
+      productName: map['productName'] ?? '',
+      productPrice: map['productPrice'] ?? '',
       quantity: map['quantity'] ?? '',
       subTotal: map['subTotal'] ?? '',
     );
@@ -143,7 +155,7 @@ class TransactionDetail {
 
   @override
   String toString() {
-    return 'TransactionDetail(transactionId: $transactionId, productId: $productId, quantity: $quantity, subTotal: $subTotal)';
+    return 'TransactionDetail(transactionId: $transactionId, productId: $productId, productName: $productName, productPrice: $productPrice, quantity: $quantity, subTotal: $subTotal)';
   }
 
   @override
@@ -153,6 +165,8 @@ class TransactionDetail {
     return other is TransactionDetail &&
         other.transactionId == transactionId &&
         other.productId == productId &&
+        other.productName == productName &&
+        other.productPrice == productPrice &&
         other.quantity == quantity &&
         other.subTotal == subTotal;
   }
@@ -161,6 +175,8 @@ class TransactionDetail {
   int get hashCode {
     return transactionId.hashCode ^
         productId.hashCode ^
+        productName.hashCode ^
+        productPrice.hashCode ^
         quantity.hashCode ^
         subTotal.hashCode;
   }

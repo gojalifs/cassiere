@@ -21,7 +21,7 @@ class _LandingPageState extends State<LandingPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: ((context) => HomePage(isAdmin: value)),
+              builder: ((context) => const HomePage()),
             ),
           );
         } else {

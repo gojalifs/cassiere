@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 class Product {
-  final int id;
+  final int? id;
   final String name;
   final String price;
   final String category;
-  final String note;
+  final String description;
   Product({
-    required this.id,
+    this.id,
     required this.name,
     required this.price,
     required this.category,
-    required this.note,
+    required this.description,
   });
 
   Product copyWith({
@@ -19,14 +19,14 @@ class Product {
     String? name,
     String? price,
     String? category,
-    String? note,
+    String? description,
   }) {
     return Product(
       id: id ?? this.id,
       name: name ?? this.name,
       price: price ?? this.price,
       category: category ?? this.category,
-      note: note ?? this.note,
+      description: description ?? this.description,
     );
   }
 
@@ -36,17 +36,17 @@ class Product {
       'name': name,
       'price': price,
       'category': category,
-      'note': note,
+      'description': description,
     };
   }
 
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
-      id: map['id']?.toInt() ?? 0,
+      id: int.parse(map['id']),
       name: map['name'] ?? '',
       price: map['price'] ?? '',
       category: map['category'] ?? '',
-      note: map['note'] ?? '',
+      description: map['description'] ?? '',
     );
   }
 
@@ -57,7 +57,7 @@ class Product {
 
   @override
   String toString() {
-    return 'Product(id: $id, name: $name, price: $price, category: $category, note: $note)';
+    return 'Product(id: $id, name: $name, price: $price, category: $category, description: $description)';
   }
 
   @override
@@ -69,7 +69,7 @@ class Product {
         other.name == name &&
         other.price == price &&
         other.category == category &&
-        other.note == note;
+        other.description == description;
   }
 
   @override
@@ -78,6 +78,6 @@ class Product {
         name.hashCode ^
         price.hashCode ^
         category.hashCode ^
-        note.hashCode;
+        description.hashCode;
   }
 }

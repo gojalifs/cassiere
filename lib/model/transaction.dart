@@ -8,14 +8,14 @@ class TransactionData {
   String total;
   String cash;
   String charge;
-  int date;
+  String timestamp;
   TransactionData({
     required this.cashierId,
     this.transactionId,
     required this.total,
     required this.cash,
     required this.charge,
-    required this.date,
+    required this.timestamp,
   });
 
   TransactionData copyWith({
@@ -24,7 +24,7 @@ class TransactionData {
     String? total,
     String? cash,
     String? charge,
-    int? date,
+    String? timestamp,
   }) {
     return TransactionData(
       cashierId: cashierId ?? this.cashierId,
@@ -32,7 +32,7 @@ class TransactionData {
       total: total ?? this.total,
       cash: cash ?? this.cash,
       charge: charge ?? this.charge,
-      date: date ?? this.date,
+      timestamp: timestamp ?? this.timestamp,
     );
   }
 
@@ -43,18 +43,18 @@ class TransactionData {
       'total': total,
       'cash': cash,
       'charge': charge,
-      'date': date,
+      'timestamp': timestamp,
     };
   }
 
   factory TransactionData.fromMap(Map<String, dynamic> map) {
     return TransactionData(
-      cashierId: map['cashierId'] ?? '',
-      transactionId: map['transactionId'],
+      cashierId: map['cashier'] ?? '',
+      transactionId: int.parse(map['main_transaction_id']),
       total: map['total'] ?? '',
       cash: map['cash'] ?? '',
       charge: map['charge'] ?? '',
-      date: int.parse(map['date']),
+      timestamp: map['timestamp'] ?? '',
     );
   }
 
@@ -65,7 +65,7 @@ class TransactionData {
 
   @override
   String toString() {
-    return 'TransactionData(cashierId: $cashierId, transactionId: $transactionId, total: $total, cash: $cash, charge: $charge, date: $date)';
+    return 'TransactionData(cashierId: $cashierId, transactionId: $transactionId, total: $total, cash: $cash, charge: $charge, timestamp: $timestamp)';
   }
 
   @override
@@ -78,7 +78,7 @@ class TransactionData {
         other.total == total &&
         other.cash == cash &&
         other.charge == charge &&
-        other.date == date;
+        other.timestamp == timestamp;
   }
 
   @override
@@ -88,33 +88,33 @@ class TransactionData {
         total.hashCode ^
         cash.hashCode ^
         charge.hashCode ^
-        date.hashCode;
+        timestamp.hashCode;
   }
 }
 
 class TransactionDetail {
-  String transactionId;
-  String productId;
-  String productName;
-  String productPrice;
-  String quantity;
-  String subTotal;
+  int transactionId;
+  int productId;
+  String? productName;
+  String? productPrice;
+  int quantity;
+  int subTotal;
   TransactionDetail({
     required this.transactionId,
     required this.productId,
-    required this.productName,
-    required this.productPrice,
+    this.productName,
+    this.productPrice,
     required this.quantity,
     required this.subTotal,
   });
 
   TransactionDetail copyWith({
-    String? transactionId,
-    String? productId,
+    int? transactionId,
+    int? productId,
     String? productName,
     String? productPrice,
-    String? quantity,
-    String? subTotal,
+    int? quantity,
+    int? subTotal,
   }) {
     return TransactionDetail(
       transactionId: transactionId ?? this.transactionId,
@@ -139,12 +139,12 @@ class TransactionDetail {
 
   factory TransactionDetail.fromMap(Map<String, dynamic> map) {
     return TransactionDetail(
-      transactionId: map['transactionId'] ?? '',
-      productId: map['productId'] ?? '',
-      productName: map['productName'] ?? '',
-      productPrice: map['productPrice'] ?? '',
-      quantity: map['quantity'] ?? '',
-      subTotal: map['subTotal'] ?? '',
+      transactionId: int.parse(map['main_transaction_id']),
+      productId: int.parse(map['product_id']),
+      productName: map['productname'],
+      productPrice: map['price'],
+      quantity: int.parse(map['quantity']),
+      subTotal: int.parse(map['subtotal']),
     );
   }
 

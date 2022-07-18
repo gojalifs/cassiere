@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final List<String> users = ['admin', 'employee'];
 
   LocalDbHelper dbHelper = LocalDbHelper();
+  OnlineDbHelper onlineDbHelper = OnlineDbHelper();
 
   @override
   void initState() {
@@ -92,23 +93,24 @@ class _LoginPageState extends State<LoginPage> {
                               onPressed: () {
                                 var navigator = Navigator.of(context);
                                 if (_formKey.currentState!.validate()) {
-                                  dbHelper
-                                      .doLogin(
-                                    _emailController.text.trim(),
-                                    _passwordController.text,
-                                    context: context,
-                                  )
+                                  // dbHelper
+                                  //     .doLogin(
+                                  //   _emailController.text.trim(),
+                                  //   _passwordController.text,
+                                  //   context: context,
+                                  // )
+                                  onlineDbHelper
+                                      .doLogin(_emailController.text,
+                                          _passwordController.text)
                                       .then((value) {
                                     print(value);
-                                    if (value[1] == 'success') {
+                                    if (value == 1) {
                                       ScaffoldMessenger.of(context)
                                           .clearSnackBars();
                                       navigator.pushReplacement(
                                         MaterialPageRoute(
                                           builder: (_) {
-                                            return HomePage(
-                                              isAdmin: value[0],
-                                            );
+                                            return HomePage();
                                           },
                                         ),
                                       );

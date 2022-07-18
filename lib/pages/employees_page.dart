@@ -14,29 +14,38 @@ class EmployeesPage extends StatefulWidget {
 
 class _EmployeesPageState extends State<EmployeesPage> {
   LocalDbHelper dbHelper = LocalDbHelper();
+  OnlineDbHelper onlineDbHelper = OnlineDbHelper();
   List<User> users = [];
-  Future getEmployees = LocalDbHelper().readEmployee();
+  // Future getEmployees = LocalDbHelper().readEmployee();
+  Future getEmployees = Future.delayed(const Duration(seconds: 1))
+      .then((value) => OnlineDbHelper().readUser());
   List employees = [];
   int id = 0;
 
-  readActiveUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    print(prefs.getInt('id'));
-    return id = prefs.getInt('id')!;
-  }
+  // readActiveUser() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   print(prefs.getInt('id'));
+  //   return id = prefs.getInt('id')!;
+  // }
 
   @override
   void initState() {
-    dbHelper.readEmployee().then((value) {
+    onlineDbHelper.readUser().then((value) {
+      print('vl $value');
       setState(() {
         users = value;
       });
     });
-    readActiveUser().then((value) {
-      setState(() {
-        id = value;
-      });
-    });
+    // dbHelper.readEmployee().then((value) {
+    //   setState(() {
+    //     users = value;
+    //   });
+    // });
+    // readActiveUser().then((value) {
+    //   setState(() {
+    //     id = value;
+    //   });
+    // });
     super.initState();
   }
 
@@ -66,73 +75,68 @@ class _EmployeesPageState extends State<EmployeesPage> {
             future: getEmployees,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                if (users.isEmpty) {
-                  return const Text('Done');
-                } else {
-                  // print(employees
-                  //     .where((element) => element['id'] == id)
-                  //     .toList());
-                  return ListView(
-                    children: users
-                        .map((e) => ListTile(
-                              title: Text(e.name!),
-                              subtitle: Text(e.email!),
-                              trailing: const Icon(Icons.arrow_forward_ios),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SignUpPage(
-                                      name: e.name,
-                                      email: e.email,
-                                      phone: e.phone,
-                                      password: e.password,
-                                      confirmPassword: e.password,
-                                      id: e.id,
-                                    ),
+                //     .toList());
+                return ListView(
+                  children: users
+                      .map((e) => ListTile(
+                            title: Text(e.name!),
+                            subtitle: Text(e.email!),
+                            trailing: const Icon(Icons.arrow_forward_ios),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SignUpPage(
+                                    name: e.name,
+                                    email: e.email,
+                                    phone: e.phone,
+                                    password: e.password,
+                                    confirmPassword: e.password,
+                                    id: e.id,
+                                    isAdmin: e.isAdmin,
                                   ),
-                                );
-                              },
-                            ))
-                        .toList(),
-                    // employees.map((e) {
-                    //   return ListTile(
-                    //     title:
-                    //         e['id'] == id ? Text(e['name']) : Text(e['name']),
-                    //     subtitle: Text(e['email']),
-                    //     trailing: e['id'] == id
-                    //         ? IconButton(
-                    //             onPressed: () {
-                    //               Navigator.of(context).push(MaterialPageRoute(
-                    //                   builder: ((context) => SignUpPage(name: e[''],))));
-                    //             },
-                    //             icon: const Icon(Icons.edit))
-                    //         : Wrap(
-                    //             children: [
-                    //               IconButton(
-                    //                 onPressed: () {},
-                    //                 icon: const Icon(Icons.edit),
-                    //               ),
-                    //               IconButton(
-                    //                 icon: const Icon(Icons.delete),
-                    //                 color: e['id'] == id
-                    //                     ? Colors.grey
-                    //                     : Colors.red,
-                    //                 onPressed: () {
-                    //                   dbHelper.deleteEmployee(e['id']);
-                    //                   setState(() {
-                    //                     employees.remove(e);
-                    //                   });
-                    //                 },
-                    //               ),
-                    //             ],
-                    //           ),
-                    //   );
-                    // }).toList(),
-                  );
-                }
+                                ),
+                              );
+                            },
+                          ))
+                      .toList(),
+                  // employees.map((e) {
+                  //   return ListTile(
+                  //     title:
+                  //         e['id'] == id ? Text(e['name']) : Text(e['name']),
+                  //     subtitle: Text(e['email']),
+                  //     trailing: e['id'] == id
+                  //         ? IconButton(
+                  //             onPressed: () {
+                  //               Navigator.of(context).push(MaterialPageRoute(
+                  //                   builder: ((context) => SignUpPage(name: e[''],))));
+                  //             },
+                  //             icon: const Icon(Icons.edit))
+                  //         : Wrap(
+                  //             children: [
+                  //               IconButton(
+                  //                 onPressed: () {},
+                  //                 icon: const Icon(Icons.edit),
+                  //               ),
+                  //               IconButton(
+                  //                 icon: const Icon(Icons.delete),
+                  //                 color: e['id'] == id
+                  //                     ? Colors.grey
+                  //                     : Colors.red,
+                  //                 onPressed: () {
+                  //                   dbHelper.deleteEmployee(e['id']);
+                  //                   setState(() {
+                  //                     employees.remove(e);
+                  //                   });
+                  //                 },
+                  //               ),
+                  //             ],
+                  //           ),
+                  //   );
+                  // }).toList(),
+                );
               } else {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               }
             },
           ),

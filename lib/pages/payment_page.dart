@@ -21,38 +21,54 @@ class _PaymentPageState extends State<PaymentPage> {
   final _amountKey = GlobalKey<FormState>();
   final _productKey = GlobalKey<FormState>();
   LocalDbHelper dbHelper = LocalDbHelper();
+  OnlineDbHelper onlineDbHelper = OnlineDbHelper();
+  String cashier = '';
   List<Product> products = [];
   List<Map<String, dynamic>> orderList = [];
-  String cashier = '';
   int qty = 1;
   int productId = 0;
   int subTotal = 0;
   int total = 0;
   int charge = 0;
-  int transactionId = 0;
-  List<TransactionData> transactionList = [];
-  Map<String, dynamic> transactionData = {};
-  Map<String, dynamic> transactionDetailData = {};
-  List<TransactionDetail> transactionDetailList = [];
-  List<int> productList = [];
+  int transactionId = 1;
+
+  List<Map<String, dynamic>> transactionDetailList = [];
 
   @override
   void initState() {
     getCashier();
-    dbHelper.readProducts().then((value) {
+    onlineDbHelper.readLastTransaction().then((value) {
       setState(() {
-        products = value;
+        transactionId = value + 1;
+        print(transactionId);
       });
+    }).catchError((e) {
+      if (e == null) {
+        setState(() {
+          transactionId = 1;
+        });
+      } else {
+        print(e);
+      }
     });
-    dbHelper.readMainTransaction().then((value) {
-      print(value.length);
-      setState(() {
-        value.isEmpty
-            ? transactionId = 1
-            : transactionId = value.last.transactionId! + 1;
-      });
-      print('id $transactionId');
-    });
+    // dbHelper.readProducts().then((value) {
+    //   setState(() {
+    //     products = value;
+    //   });
+    // });
+
+    // dbHelper.readMainTransaction().then((value) {
+    //   print(value.length);
+    //   setState(() {
+    //     value.isEmpty
+    //         ? transactionId = 1
+    //         : transactionId = value.last.transactionId! + 1;
+    //   });
+    //   print('id $transactionId');
+    // });
+    onlineDbHelper.readProduct().then((value) => setState(() {
+          products = value;
+        }));
     super.initState();
   }
 
@@ -127,7 +143,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             setState(() {
                               productId = products
                                   .firstWhere((e) => e.name == value)
-                                  .id;
+                                  .id!;
                               _productIdController.text = productId.toString();
                             });
                           },
@@ -240,11 +256,6 @@ class _PaymentPageState extends State<PaymentPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_productKey.currentState!.validate()) {
-                          var dt = DateTime.now();
-                          var formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-                          String formattedDateTime = formatter.format(dt);
-                          print(formattedDateTime);
-
                           setState(() {
                             orderList.add({
                               'productId': productId,
@@ -270,27 +281,23 @@ class _PaymentPageState extends State<PaymentPage> {
                                 .reduce((e, f) => e + f);
                           });
 
-                          productList.add(productId);
                           // print(productList);
-                          transactionDetailData = {
-                            'transactionId': transactionId.toString(),
-                            'productId': productId,
-                            'quantity': qty.toString(),
-                            'subTotal': subTotal.toString(),
-                          };
-                          TransactionDetail.fromMap(transactionDetailData);
-                          transactionDetailList.add(
-                              TransactionDetail.fromMap(transactionDetailData));
+                          // transactionDetailData = {
+                          //   'transactionId': transactionId.toString(),
+                          //   'productId': productId,
+                          //   'quantity': qty.toString(),
+                          //   'subTotal': subTotal.toString(),
+                          // };
+                          // TransactionDetail.fromMap(transactionDetailData);
+                          // transactionDetailList.add(
+                          //     TransactionDetail.fromMap(transactionDetailData));
+                          transactionDetailList.add(TransactionDetail(
+                                  transactionId: transactionId,
+                                  productId: productId,
+                                  quantity: qty,
+                                  subTotal: subTotal)
+                              .toMap());
                           print(transactionDetailList);
-                          transactionData = {
-                            'cashier_id': 'Fajar',
-                            'transaction_detail':
-                                transactionDetailData.toString(),
-                            'total': total.toString(),
-                            'cash': _amountController.text,
-                            'charge': charge.toString(),
-                            'date': DateTime.now().millisecondsSinceEpoch
-                          };
                         }
                       },
                       child: const Text('Add to Order List'),
@@ -350,6 +357,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               return null;
                             },
                             onChanged: (value) {
+                              print(_amountController.text);
                               if (_amountController.text.isEmpty) {
                                 setState(() {
                                   charge = 0;
@@ -387,18 +395,23 @@ class _PaymentPageState extends State<PaymentPage> {
                       onPressed: () {
                         if (_amountKey.currentState!.validate()) {
                           primaryFocus!.unfocus();
-                          dbHelper.insertTransaction(
-                            // transactionData, transactionDetailList);
-                            TransactionData(
-                                cashierId: cashier,
-                                total: total.toString(),
-                                cash: _amountController.text,
-                                charge: charge.toString(),
-                                date: DateTime.now().millisecondsSinceEpoch),
-                            transactionDetailList,
-                          );
+                          // dbHelper.insertTransaction(
+                          //   // transactionData, transactionDetailList);
+                          //   TransactionData(
+                          //       cashierId: cashier,
+                          //       total: total.toString(),
+                          //       cash: _amountController.text,
+                          //       charge: charge.toString(),
+                          //       date: DateTime.now().millisecondsSinceEpoch),
+                          //   transactionDetailList,
+                          // );
+                          var dt = DateTime.now();
+                          var formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+                          String formattedDateTime = formatter.format(dt);
+                          print('formattedDateTime $formattedDateTime');
                           showDialog(
                               context: context,
+                              barrierDismissible: false,
                               builder: (context) {
                                 return AlertDialog(
                                   title: const Text('Confirmation'),
@@ -409,6 +422,14 @@ class _PaymentPageState extends State<PaymentPage> {
                                       child: const Text('Yes'),
                                       onPressed: () {
                                         Navigator.pop(context);
+                                        onlineDbHelper.insertTransactions(
+                                            TransactionData(
+                                                cashierId: cashier,
+                                                total: total.toString(),
+                                                cash: _amountController.text,
+                                                charge: charge.toString(),
+                                                timestamp: formattedDateTime),
+                                            transactionDetailList);
                                         showDialog(
                                             context: context,
                                             builder: (context) {
@@ -424,6 +445,22 @@ class _PaymentPageState extends State<PaymentPage> {
                                                   TextButton(
                                                     child: const Text('OK'),
                                                     onPressed: () {
+                                                      setState(() {
+                                                        orderList.clear();
+                                                        transactionDetailList
+                                                            .clear();
+                                                        _amountController
+                                                            .clear();
+                                                        charge = 0;
+                                                        total = 0;
+                                                        qty = 1;
+                                                        productId = 0;
+                                                        subTotal = 0;
+                                                        total = 0;
+                                                        charge = 0;
+                                                        transactionId += 1;
+                                                      });
+
                                                       Navigator.pop(context);
                                                     },
                                                   ),

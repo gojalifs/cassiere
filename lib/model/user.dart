@@ -6,7 +6,8 @@ class User {
   String? email;
   String? phone;
   String? password;
-  int? isAdmin;
+  bool? isAdmin;
+  bool? isOwner;
   User({
     this.id,
     this.name,
@@ -14,6 +15,7 @@ class User {
     this.phone,
     this.password,
     this.isAdmin,
+    this.isOwner,
   });
 
   User copyWith({
@@ -22,7 +24,8 @@ class User {
     String? email,
     String? phone,
     String? password,
-    int? isAdmin,
+    bool? isAdmin,
+    bool? isOwner,
   }) {
     return User(
       id: id ?? this.id,
@@ -31,6 +34,7 @@ class User {
       phone: phone ?? this.phone,
       password: password ?? this.password,
       isAdmin: isAdmin ?? this.isAdmin,
+      isOwner: isOwner ?? this.isOwner,
     );
   }
 
@@ -42,17 +46,19 @@ class User {
       'phone': phone,
       'password': password,
       'isAdmin': isAdmin,
+      'isOwner': isOwner,
     };
   }
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
-      id: map['id']?.toInt(),
+      id: int.parse(map['user_id']),
       name: map['name'],
       email: map['email'],
       phone: map['phone'],
       password: map['password'],
-      isAdmin: map['isAdmin']?.toInt(),
+      isAdmin: map['isAdmin'] == '1' ? true : false,
+      isOwner: map['isOwner'] == '1' ? true : false,
     );
   }
 
@@ -62,7 +68,7 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, phone: $phone, password: $password, isAdmin: $isAdmin)';
+    return 'User(id: $id, name: $name, email: $email, phone: $phone, password: $password, isAdmin: $isAdmin, isOwner: $isOwner)';
   }
 
   @override
@@ -75,7 +81,8 @@ class User {
         other.email == email &&
         other.phone == phone &&
         other.password == password &&
-        other.isAdmin == isAdmin;
+        other.isAdmin == isAdmin &&
+        other.isOwner == isOwner;
   }
 
   @override
@@ -85,6 +92,7 @@ class User {
         email.hashCode ^
         phone.hashCode ^
         password.hashCode ^
-        isAdmin.hashCode;
+        isAdmin.hashCode ^
+        isOwner.hashCode;
   }
 }
